@@ -44,7 +44,6 @@ namespace {
 	public:
 		using Extractor::Extractor;
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
-			context.path.clear();
 			glm::vec2 pos(vars[0].GetReal(), vars[1].GetReal());
 			context.current_pos =
 			context.start_pos = pos;
@@ -113,7 +112,6 @@ namespace {
 	public:
 		using Extractor::Extractor;
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
-			context.path.clear();
 			glm::vec4 xywh(vars[0].GetReal(), vars[1].GetReal(), vars[2].GetReal(), vars[3].GetReal());
 			ofLogVerbose("ofxPoDoFoParser") << "rect: " << xywh;
 			glm::vec2 pos[4] = {
@@ -395,6 +393,7 @@ std::vector<ofPath> Parser::parse(PdfContentsTokenizer *tokenizer, Parser::Conte
 						)
 				{
 					ret.push_back(context.clipping_enabled ? context.getClippedPath(): context.path);
+					context.path.clear();
 				}
 				else if(Any(token).extract(token, context, vars)) {}
 				else {
