@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 //	ofSetLogLevel(OF_LOG_VERBOSE);
-	doc_.load("design template/hinoki_sugi design template.pdf");
+	doc_.load("tiger.pdf");
 }
 
 //--------------------------------------------------------------
@@ -13,10 +13,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	ofPushMatrix();
-//	ofScale(0.3f,0.3f);
 	doc_.draw();
-	ofPopMatrix();
 }
 
 //--------------------------------------------------------------
