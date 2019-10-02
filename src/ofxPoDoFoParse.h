@@ -16,7 +16,7 @@ public:
 		Context();
 		ofPath getClippedPath() const;
 	};
-	std::vector<ofPath> parse(PoDoFo::PdfContentsTokenizer *tokenizer, Parser::Context *context=nullptr);
+	std::vector<ofPath> parse(PoDoFo::PdfContentsTokenizer *tokenizer, Parser::Context context=Parser::Context());
 };
 class Extractor {
 public:

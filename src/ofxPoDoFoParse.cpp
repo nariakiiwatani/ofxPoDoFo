@@ -323,13 +323,9 @@ ofPath Parser::Context::getClippedPath() const
 	return ret;
 }
 
-std::vector<ofPath> Parser::parse(PdfContentsTokenizer *tokenizer, Parser::Context *context)
+std::vector<ofPath> Parser::parse(PdfContentsTokenizer *tokenizer, Parser::Context context)
 {
 	std::vector<ofPath> ret;
-	Parser::Context c;
-	if(context == nullptr) {
-		context = &c;
-	}
 	const char *token = NULL;
 	EPdfContentsType type;
 	PdfVariant var;
@@ -341,62 +337,61 @@ std::vector<ofPath> Parser::parse(PdfContentsTokenizer *tokenizer, Parser::Conte
 		switch(type) {
 			case ePdfContentsType_Keyword: {
 				if(false) {}
-				else if(Ignore("j").extract(token, *context, vars)) {}
-				else if(Ignore("J").extract(token, *context, vars)) {}
-				else if(Ignore("M").extract(token, *context, vars)) {}
-				else if(Ignore("d").extract(token, *context, vars)) {}
-				else if(Ignore("ri").extract(token, *context, vars)) {}
-				else if(Ignore("i").extract(token, *context, vars)) {}
-				else if(Ignore("MP").extract(token, *context, vars)) {}
-				else if(Ignore("DP").extract(token, *context, vars)) {}
-				else if(Ignore("BMC").extract(token, *context, vars)) {}
-				else if(Ignore("BDC").extract(token, *context, vars)) {}
-				else if(Ignore("EMC").extract(token, *context, vars)) {}
+				else if(Ignore("j").extract(token, context, vars)) {}
+				else if(Ignore("J").extract(token, context, vars)) {}
+				else if(Ignore("M").extract(token, context, vars)) {}
+				else if(Ignore("d").extract(token, context, vars)) {}
+				else if(Ignore("ri").extract(token, context, vars)) {}
+				else if(Ignore("i").extract(token, context, vars)) {}
+				else if(Ignore("MP").extract(token, context, vars)) {}
+				else if(Ignore("DP").extract(token, context, vars)) {}
+				else if(Ignore("BMC").extract(token, context, vars)) {}
+				else if(Ignore("BDC").extract(token, context, vars)) {}
+				else if(Ignore("EMC").extract(token, context, vars)) {}
 				
-				else if(ShouldHandle("cs").extract(token, *context, vars)) {}
-				else if(ShouldHandle("CS").extract(token, *context, vars)) {}
-				else if(ShouldHandle("gs").extract(token, *context, vars)) {}
+				else if(ShouldHandle("cs").extract(token, context, vars)) {}
+				else if(ShouldHandle("CS").extract(token, context, vars)) {}
+				else if(ShouldHandle("gs").extract(token, context, vars)) {}
 				
-				else if(BeginGroup("q").extract(token, *context, vars)) {
-					Parser::Context cache = *context;
-					auto &&paths = parse(tokenizer, &cache);
+				else if(BeginGroup("q").extract(token, context, vars)) {
+					auto &&paths = parse(tokenizer, context);
 					ret.insert(end(ret), begin(paths), end(paths));
 				}
-				else if(EndGroup("Q").extract(token, *context, vars)) {
+				else if(EndGroup("Q").extract(token, context, vars)) {
 					escape = true;
 				}
-				else if(AffineTransform("cm").extract(token, *context, vars)) {}
-				else if(MoveTo("m").extract(token, *context, vars)) {}
-				else if(LineTo("l").extract(token, *context, vars)) {}
-				else if(BezierTo("c").extract(token, *context, vars)) {}
-				else if(EaseInTo("y").extract(token, *context, vars)) {}
-				else if(EaseOutTo("v").extract(token, *context, vars)) {}
-				else if(Rectangle("re").extract(token, *context, vars)) {}
-				else if(Close("h").extract(token, *context, vars)) {}
-				else if(StrokeWidth("w").extract(token, *context, vars)) {}
-				else if(StrokeWidth("LW").extract(token, *context, vars)) {}
-				else if(StrokeColor("G").extract(token, *context, vars)) {}
-				else if(StrokeColor("RG").extract(token, *context, vars)) {}
-				else if(StrokeColor("SCN").extract(token, *context, vars)) {}
-				else if(FillColor("g").extract(token, *context, vars)) {}
-				else if(FillColor("rg").extract(token, *context, vars)) {}
-				else if(FillColor("scn").extract(token, *context, vars)) {}
-				else if(Clipping("W", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars)) {}
-				else if(Clipping("W*", OF_POLY_WINDING_ODD, true).extract(token, *context, vars)) {}
-				else if(Stroke("s", OF_POLY_WINDING_ODD, true).extract(token, *context, vars) ||
-						Stroke("S", OF_POLY_WINDING_ODD, false).extract(token, *context, vars) ||
-						Fill("f", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars) ||
-						Fill("f*", OF_POLY_WINDING_ODD, true).extract(token, *context, vars) ||
-						StrokeFill("b", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars) ||
-						StrokeFill("b*", OF_POLY_WINDING_ODD, true).extract(token, *context, vars) ||
-						StrokeFill("B", OF_POLY_WINDING_NONZERO, false).extract(token, *context, vars) ||
-						StrokeFill("B*", OF_POLY_WINDING_ODD, false).extract(token, *context, vars) ||
-						NoDraw("n", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars)
+				else if(AffineTransform("cm").extract(token, context, vars)) {}
+				else if(MoveTo("m").extract(token, context, vars)) {}
+				else if(LineTo("l").extract(token, context, vars)) {}
+				else if(BezierTo("c").extract(token, context, vars)) {}
+				else if(EaseInTo("y").extract(token, context, vars)) {}
+				else if(EaseOutTo("v").extract(token, context, vars)) {}
+				else if(Rectangle("re").extract(token, context, vars)) {}
+				else if(Close("h").extract(token, context, vars)) {}
+				else if(StrokeWidth("w").extract(token, context, vars)) {}
+				else if(StrokeWidth("LW").extract(token, context, vars)) {}
+				else if(StrokeColor("G").extract(token, context, vars)) {}
+				else if(StrokeColor("RG").extract(token, context, vars)) {}
+				else if(StrokeColor("SCN").extract(token, context, vars)) {}
+				else if(FillColor("g").extract(token, context, vars)) {}
+				else if(FillColor("rg").extract(token, context, vars)) {}
+				else if(FillColor("scn").extract(token, context, vars)) {}
+				else if(Clipping("W", OF_POLY_WINDING_NONZERO, true).extract(token, context, vars)) {}
+				else if(Clipping("W*", OF_POLY_WINDING_ODD, true).extract(token, context, vars)) {}
+				else if(Stroke("s", OF_POLY_WINDING_ODD, true).extract(token, context, vars) ||
+						Stroke("S", OF_POLY_WINDING_ODD, false).extract(token, context, vars) ||
+						Fill("f", OF_POLY_WINDING_NONZERO, true).extract(token, context, vars) ||
+						Fill("f*", OF_POLY_WINDING_ODD, true).extract(token, context, vars) ||
+						StrokeFill("b", OF_POLY_WINDING_NONZERO, true).extract(token, context, vars) ||
+						StrokeFill("b*", OF_POLY_WINDING_ODD, true).extract(token, context, vars) ||
+						StrokeFill("B", OF_POLY_WINDING_NONZERO, false).extract(token, context, vars) ||
+						StrokeFill("B*", OF_POLY_WINDING_ODD, false).extract(token, context, vars) ||
+						NoDraw("n", OF_POLY_WINDING_NONZERO, true).extract(token, context, vars)
 						)
 				{
-					ret.push_back(context->clipping_enabled ? context->getClippedPath(): context->path);
+					ret.push_back(context.clipping_enabled ? context.getClippedPath(): context.path);
 				}
-				else if(Any(token).extract(token, *context, vars)) {}
+				else if(Any(token).extract(token, context, vars)) {}
 				else {
 					ofLogError("ofxPoDoFoParser") << "something is wrong";
 				}
