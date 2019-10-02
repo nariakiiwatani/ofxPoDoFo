@@ -9,10 +9,11 @@ class Parser {
 public:
 	struct Context {
 		glm::mat4 mat = glm::mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
-		ofPath path;
+		ofPath path, clipping;
 		float stroke_width=1;
 		glm::vec2 start_pos, current_pos;
 		Context();
+		ofPath getClippedPath() const;
 	};
 	std::vector<ofPath> parse(PoDoFo::PdfContentsTokenizer *tokenizer, Parser::Context *context=nullptr);
 };
