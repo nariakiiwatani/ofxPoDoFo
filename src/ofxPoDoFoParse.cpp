@@ -302,15 +302,20 @@ Parser::Context::Context() {
 
 ofPath Parser::Context::getClippedPath() const
 {
+	ofPath c = clipping, p = path;
+	const float upscale = 1000000;
+	c.scale(upscale, upscale);
+	p.scale(upscale, upscale);
 	ofxClipper clipper;
-	clipper.addPath(clipping, OFX_CLIPPER_CLIP);
-	clipper.addPath(path, OFX_CLIPPER_SUBJECT);
+	clipper.addPath(c, OFX_CLIPPER_CLIP);
+	clipper.addPath(p, OFX_CLIPPER_SUBJECT);
 	std::vector<ofPolyline> polys;
 	clipper.clip(OFX_CLIPPER_INTERSECTION, polys);
 	ofPath ret = path;
 	ret.clear();
 	for(auto &&poly : polys) {
 		if(poly.size() < 2) continue;
+		poly.scale(1/upscale, 1/upscale);
 		ret.moveTo(poly[0]);
 		for(int i = 1; i < poly.size(); ++i) {
 			ret.lineTo(poly[i]);
