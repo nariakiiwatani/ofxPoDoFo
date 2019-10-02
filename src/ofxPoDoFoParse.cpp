@@ -273,6 +273,7 @@ namespace {
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
 			ofLogVerbose("ofxPoDoFoParser") << "clipping";
 			context.clipping.append(context.path);
+			context.clipping_enabled = true;
 		}
 	};
 };
@@ -282,6 +283,7 @@ Parser::Context::Context() {
 
 ofPath Parser::Context::getClippedPath() const
 {
+	if(!clipping_enabled) { return path; }
 	ofxClipper clipper;
 	clipper.addPath(clipping, OFX_CLIPPER_CLIP);
 	clipper.addPath(path, OFX_CLIPPER_SUBJECT);

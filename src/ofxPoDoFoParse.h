@@ -10,6 +10,7 @@ public:
 	struct Context {
 		glm::mat4 mat = glm::mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
 		ofPath path, clipping;
+		bool clipping_enabled=false;
 		float stroke_width=1;
 		glm::vec2 start_pos, current_pos;
 		Context();
