@@ -169,15 +169,6 @@ namespace {
 			context.stroke_width = width;
 		}
 	};
-	class Stroke : public Extractor {
-	public:
-		using Extractor::Extractor;
-		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
-			ofLogVerbose("ofxPoDoFoParser") << "draw stroke";
-			context.path.setFilled(false);
-			context.path.setStrokeWidth(context.stroke_width);
-		}
-	};
 	class FillColor : public Extractor {
 	public:
 		using Extractor::Extractor;
@@ -187,29 +178,56 @@ namespace {
 			context.path.setFillColor(color);
 		}
 	};
-	class Fill : public Extractor {
+	class Drawer : public Extractor {
 	public:
-		using Extractor::Extractor;
+		Drawer(const std::string &token, ofPolyWindingMode winding_mode, bool close_path)
+		:Extractor(token),winding_mode_(winding_mode),close_path_(close_path) { }
+		virtual void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
+			context.path.setPolyWindingMode(winding_mode_);
+			if(close_path_) {
+				context.path.close();
+			}
+		}
+	protected:
+		ofPolyWindingMode winding_mode_;
+		bool close_path_;
+	};
+	class Stroke : public Drawer {
+	public:
+		using Drawer::Drawer;
+		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
+			ofLogVerbose("ofxPoDoFoParser") << "draw stroke";
+			Drawer::run(context, vars);
+			context.path.setFilled(false);
+			context.path.setStrokeWidth(context.stroke_width);
+		}
+	};
+	class Fill : public Drawer {
+	public:
+		using Drawer::Drawer;
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
 			ofLogVerbose("ofxPoDoFoParser") << "draw fill";
+			Drawer::run(context, vars);
 			context.path.setFilled(true);
 			context.path.setStrokeWidth(0);
 		}
 	};
-	class StrokeFill : public Extractor {
+	class StrokeFill : public Drawer {
 	public:
-		using Extractor::Extractor;
+		using Drawer::Drawer;
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
 			ofLogVerbose("ofxPoDoFoParser") << "draw fill stroke";
+			Drawer::run(context, vars);
 			context.path.setFilled(true);
 			context.path.setStrokeWidth(context.stroke_width);
 		}
 	};
-	class NoDraw : public Extractor {
+	class NoDraw : public Drawer {
 	public:
-		using Extractor::Extractor;
+		using Drawer::Drawer;
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
 			ofLogVerbose("ofxPoDoFoParser") << "no draw";
+			Drawer::run(context, vars);
 			context.path.setFilled(false);
 			context.path.setStrokeWidth(0);
 		}
@@ -267,11 +285,12 @@ namespace {
 			log << ")";
 		}
 	};
-	class Clipping : public Extractor {
+	class Clipping : public Drawer {
 	public:
-		using Extractor::Extractor;
+		using Drawer::Drawer;
 		void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars) {
 			ofLogVerbose("ofxPoDoFoParser") << "clipping";
+			Drawer::run(context, vars);
 			context.clipping.append(context.path);
 			context.clipping_enabled = true;
 		}
@@ -283,7 +302,6 @@ Parser::Context::Context() {
 
 ofPath Parser::Context::getClippedPath() const
 {
-	if(!clipping_enabled) { return path; }
 	ofxClipper clipper;
 	clipper.addPath(clipping, OFX_CLIPPER_CLIP);
 	clipper.addPath(path, OFX_CLIPPER_SUBJECT);
@@ -363,51 +381,22 @@ std::vector<ofPath> Parser::parse(PdfContentsTokenizer *tokenizer, Parser::Conte
 				else if(FillColor("g").extract(token, *context, vars)) {}
 				else if(FillColor("rg").extract(token, *context, vars)) {}
 				else if(FillColor("scn").extract(token, *context, vars)) {}
-				else if(Stroke("s").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_ODD);
-					context->path.close();
-					ret.push_back(context->getClippedPath());
+				else if(Clipping("W", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars)) {}
+				else if(Clipping("W*", OF_POLY_WINDING_ODD, true).extract(token, *context, vars)) {}
+				else if(Stroke("s", OF_POLY_WINDING_ODD, true).extract(token, *context, vars) ||
+						Stroke("S", OF_POLY_WINDING_ODD, false).extract(token, *context, vars) ||
+						Fill("f", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars) ||
+						Fill("f*", OF_POLY_WINDING_ODD, true).extract(token, *context, vars) ||
+						StrokeFill("b", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars) ||
+						StrokeFill("b*", OF_POLY_WINDING_ODD, true).extract(token, *context, vars) ||
+						StrokeFill("B", OF_POLY_WINDING_NONZERO, false).extract(token, *context, vars) ||
+						StrokeFill("B*", OF_POLY_WINDING_ODD, false).extract(token, *context, vars) ||
+						NoDraw("n", OF_POLY_WINDING_NONZERO, true).extract(token, *context, vars)
+						)
+				{
+					ret.push_back(context->clipping_enabled ? context->getClippedPath(): context->path);
 				}
-				else if(Stroke("S").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_ODD);
-					ret.push_back(context->getClippedPath());
-				}
-				else if(Fill("f").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_NONZERO);
-					context->path.close();
-					ret.push_back(context->getClippedPath());
-				}
-				else if(Fill("f*").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_ODD);
-					context->path.close();
-					ret.push_back(context->getClippedPath());
-				}
-				else if(StrokeFill("b").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_NONZERO);
-					context->path.close();
-					ret.push_back(context->getClippedPath());
-				}
-				else if(StrokeFill("b*").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_ODD);
-					context->path.close();
-					ret.push_back(context->getClippedPath());
-				}
-				else if(StrokeFill("B").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_NONZERO);
-					ret.push_back(context->getClippedPath());
-				}
-				else if(StrokeFill("B*").extract(token, *context, vars)) {
-					context->path.setPolyWindingMode(OF_POLY_WINDING_ODD);
-					ret.push_back(context->getClippedPath());
-				}
-				else if(NoDraw("n").extract(token, *context, vars)) {
-					ret.push_back(context->getClippedPath());
-				}
-				else if(Clipping("W").extract(token, *context, vars)) {
-					
-				}
-				else if(Any(token).extract(token, *context, vars)) {
-				}
+				else if(Any(token).extract(token, *context, vars)) {}
 				else {
 					ofLogError("ofxPoDoFoParser") << "something is wrong";
 				}
