@@ -4,7 +4,10 @@
 #include "ofPath.h"
 #include <string>
 
-namespace ofx { namespace podofo {
+using std::vector;
+using std::string;
+using namespace PoDoFo;
+
 class Page {
 public:
 	void addPath(const ofPath &path) {
@@ -29,6 +32,5 @@ public:
 private:
 	std::vector<Page> page_;
 };
-}}
 
-using ofxPoDoFo = ofx::podofo::Document;
+//using ofxPoDoFo = podofo::Document;

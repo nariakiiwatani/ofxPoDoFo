@@ -1,10 +1,14 @@
 #pragma once
 
-#include "podofo.h"
-#include "ofPath.h"
 
-namespace ofx { namespace podofo {
-namespace parse {
+#include "ofPath.h"
+#include <podofo/podofo.h>
+#include "ofxClipper.h"
+
+using namespace PoDoFo;
+
+// All PoDoFo classes are member of the PoDoFo namespace.
+
 class Parser {
 public:
 	struct Context {
@@ -16,8 +20,9 @@ public:
 		Context();
 		ofPath getClippedPath() const;
 	};
-	std::vector<ofPath> parse(PoDoFo::PdfContentsTokenizer *tokenizer, Parser::Context context=Parser::Context());
+	std::vector<ofPath> parse(PdfTokenizer *tokenizer, Parser::Context context=Parser::Context());
 };
+
 class Extractor {
 public:
 	Extractor(const std::string &token)
@@ -33,5 +38,4 @@ protected:
 	virtual void run(Parser::Context &context, const std::vector<PoDoFo::PdfVariant> &vars){}
 	std::string token_;
 };
-}
-}}
+
