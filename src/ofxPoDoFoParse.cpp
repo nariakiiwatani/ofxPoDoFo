@@ -1,29 +1,28 @@
 #include "ofxPoDoFoParse.h"
-#include "ofxClipper.h"
 
-using namespace ofx::podofo::parse;
+
 using namespace PoDoFo;
-using namespace std;
+using std::string;
 
 namespace {
-	std::string print(const PoDoFo::PdfVariant &var) {
-		std::string ss;
-		switch(var.GetDataType()) {
-			case ePdfDataType_Bool:			ss = std::string() + "bool: " + (var.GetBool()?"true":"false"); break;
-			case ePdfDataType_Number:		ss = std::string() + "number: " + ofToString(var.GetNumber()); break;
-			case ePdfDataType_Real:			ss = std::string() + "real: " + ofToString(var.GetReal()); break;
-			case ePdfDataType_String:
-			case ePdfDataType_HexString:	ss = std::string() + "string: " + var.GetString().GetString(); break;
-			case ePdfDataType_Name:			ss = std::string() + "name: " + var.GetName().GetName(); break;
-			case ePdfDataType_Array:
-			case ePdfDataType_Dictionary:
-			case ePdfDataType_Null:
-			case ePdfDataType_Reference:
-			case ePdfDataType_RawData:
-			case ePdfDataType_Unknown: ss = "unhandled"; break;
-		}
-		return ss;
-	}
+//	std::string print(const PoDoFo::PdfVariant &var) {
+////		std::string ss;
+////		switch(var.GetDataType()) {
+////            case PdfLiteralDataType::Bool:			ss = std::string() + "bool: " + (var.GetBool()?"true":"false"); break;
+////			case ePdfDataType_Number:		ss = std::string() + "number: " + ofToString(var.GetNumber()); break;
+////			case ePdfDataType_Real:			ss = std::string() + "real: " + ofToString(var.GetReal()); break;
+////			case ePdfDataType_String:
+////			case ePdfDataType_HexString:	ss = std::string() + "string: " + var.GetString().GetString(); break;
+////			case ePdfDataType_Name:			ss = std::string() + "name: " + var.GetName().GetName(); break;
+////			case ePdfDataType_Array:
+////			case ePdfDataType_Dictionary:
+////			case ePdfDataType_Null:
+////			case ePdfDataType_Reference:
+////			case ePdfDataType_RawData:
+////			case ePdfDataType_Unknown: ss = "unhandled"; break;
+////		}
+//		return ss;
+//	}
 }
 namespace {
 	class AffineTransform : public Extractor {
@@ -251,9 +250,9 @@ namespace {
 			auto &&log = ofLogNotice("ofxPoDoFoParser");
 			log << "ignore: " << token_;
 			log << "(";
-			for(auto &&v : vars) {
-				log << print(v) << ", ";
-			}
+//			for(auto &&v : vars) {
+//				log << print(v) << ", ";
+//			}
 			log << ")";
 		}
 	};
@@ -264,9 +263,9 @@ namespace {
 			auto &&log = ofLogWarning("ofxPoDoFoParser");
 			log << "unhandled: " << token_;
 			log << "(";
-			for(auto &&v : vars) {
-				log << print(v) << ", ";
-			}
+//			for(auto &&v : vars) {
+//				log << print(v) << ", ";
+//			}
 			log << ")";
 		}
 	};
@@ -277,9 +276,9 @@ namespace {
 			auto &&log = ofLogWarning("ofxPoDoFoParser");
 			log << "unknown: " << token_;
 			log << "(";
-			for(auto &&v : vars) {
-				log << print(v) << ", ";
-			}
+//			for(auto &&v : vars) {
+//				log << print(v) << ", ";
+//			}
 			log << ")";
 		}
 	};
@@ -304,11 +303,11 @@ ofPath Parser::Context::getClippedPath() const
 	const float upscale = 1000000;
 	c.scale(upscale, upscale);
 	p.scale(upscale, upscale);
-	ofxClipper clipper;
-	clipper.addPath(c, OFX_CLIPPER_CLIP);
-	clipper.addPath(p, OFX_CLIPPER_SUBJECT);
+//	ofxClipper clipper;
+//	clipper.addPath(c, OFX_CLIPPER_CLIP);
+//	clipper.addPath(p, OFX_CLIPPER_SUBJECT);
 	std::vector<ofPolyline> polys;
-	clipper.clip(OFX_CLIPPER_INTERSECTION, polys);
+//	clipper.clip(OFX_CLIPPER_INTERSECTION, polys);
 	ofPath ret = path;
 	ret.clear();
 	for(auto &&poly : polys) {
